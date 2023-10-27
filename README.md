@@ -1,5 +1,5 @@
 # Aurget
-## A very minimal AUR helper written in under 200 lines of pure BASH.
+## A very minimal AUR helper.
 ### Installation
 #### dependencies
 - git  
