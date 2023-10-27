@@ -7,7 +7,7 @@
 - curl  
 
 `$ git clone https://github.com/yazoink/Aurget`  
-`$ cd aurget`  
+`$ cd Aurget`  
 `$ ./install.sh`  
 
 ### Usage
