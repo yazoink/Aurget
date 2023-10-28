@@ -3,6 +3,7 @@
 if [[ ! -d ~/.local/bin ]]; then
     mkdir -p ~/.local/bin
     echo 'export PATH="~/.local/bin:$PATH"' >> ~/.*shrc
+    source ~/.*shrc
 fi
 
 chmod +x aurget
