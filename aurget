@@ -1,15 +1,16 @@
 #!/bin/bash
 
+# sanitize
 unset answer i version installedver latestver pkg desc version
 
 srcdir=~/.cache/aurget # directory for cloned repos
-cfgdir=~/.config/aurget
+cfgdir=~/.local/share/aurget
 pkgfile=$cfgdir/aurgetpkgs # list of installed packages
 aurpkgs=$(cat $pkgfile | sed "s/\s.*//")
 pkgcount=$(echo $aurpkgs | wc -w)
 
 answeryes () {
-    if [[ $answer == "y" ]] || [[ $answer == "Y" ]] || [[ $answer == "yes" ]] || [[ $answer == "" ]] || [[ $answer == "YES" ]] || [[ $answer == "Yes" ]]; then
+    if [[ ${answer^^} == "YES" ]] || [[ ${answer^^} == "Y" ]] || [[ $answer == "" ]]; then
         return 0
     else
         return 1
