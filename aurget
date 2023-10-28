@@ -169,6 +169,15 @@ clean () {
     fi
 }
 
+upgradeaurget () {
+    if [[ $# == 0 ]]; then
+        curl -s https://raw.githubusercontent.com/yazoink/Aurget/master/aurget -o ~/.local/bin/aurget
+        printf "Aurget upgraded!\n"
+    else
+        usage
+    fi
+}
+
 usage () {
     echo "Usage: aurget <option> [PACKAGE(S)]
     Options:
@@ -176,6 +185,7 @@ usage () {
     --remove, -r                    Remove packages
     --purge, -p                     Purge packages
     --update, -u                    Upgrade all packages
+    --update-aurget, -ua            Upgrade Aurget
     --version, -v                   See version of package
     --list -l,                      List all installed AUR packages
     --search, -s                    Search for package
@@ -196,6 +206,7 @@ case $1 in
     --remove | -r) removeall "${@:2}" && exit 0 ;;
     --purge | -p) purgeall "${@:2}" && exit 0 ;;
     --update | -u) updateall "${@:2}" && exit 0 ;;
+    --update-aurget | -ua) upgradeaurget "${@:2}" && exit 0;;
     --version | -v) versionall "${@:2}" && exit 0 ;;
     --list | -l) cat $pkgfile && exit 0 ;;
     --search | -s) search "${@:2}" && exit 0 ;;
