@@ -6,9 +6,9 @@
 - base-devel
 - curl
 
-`$ git clone https://github.com/yazoink/Aurget`
-`$ cd Aurget`
-`$ ./install.sh`
+`$ git clone https://github.com/yazoink/Aurget`   
+`$ cd Aurget`    
+`$ ./install.sh`    
 
 ### Usage
 #### aurget (option) [PACKAGE(S)]
