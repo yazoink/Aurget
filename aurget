@@ -14,7 +14,7 @@ while read -r line; do
     pkgs[i]=$(echo "$line" | sed 's/\s.*//')
     ((i++))
 done < "$pkgfile"
-pkgcount=$(echo ${pkgs[@]} | wc -w)
+pkgcount=$(echo "${pkgs[@]}" | wc -w)
 
 answeryes () {
     if [[ ${answer^^} == "YES" ]] || [[ ${answer^^} == "Y" ]] || [[ $answer == "" ]]; then
@@ -116,7 +116,7 @@ updatepkg () {
         fi
         git clone -q https://aur.archlinux.org/"$1".git "$srcdir"/"$1"
         installpkg "$1"
-        printf "Upgraded %s from %s to %s" upgraded "$1" "$installedver" "$latestver \n"
+        printf "Upgraded %s from %s to %s\n" upgraded "$1" "$installedver" "$latestver"
     fi
 }
 
