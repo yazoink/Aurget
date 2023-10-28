@@ -168,10 +168,10 @@ usage () {
 }
 
 if [[ ! -d $srcdir ]]; then # if source directory doesn't exist, create it
-    mkdir $srcdir
+    mkdir -p $srcdir
 fi
 if [[ ! -d $cfgdir ]]; then # if config directory and package file don't exist, create them
-    mkdir $cfgdir
+    mkdir -p $cfgdir
     touch $pkgfile
 fi
 
