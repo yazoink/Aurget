@@ -6,7 +6,7 @@ srcdir=~/.cache/aurget # directory for cloned repos
 cfgdir=~/.local/share/aurget
 pkgfile=$cfgdir/aurgetpkgs # list of installed packages
 aurpkgs=$(cat $pkgfile | sed "s/\s.*//")
-pkgcount=$(echo $aurpkgs | wc -w)
+pkgcount=$(echo "$aurpkgs" | wc -w)
 
 answeryes () {
     if [[ ${answer^^} == "YES" ]] || [[ ${answer^^} == "Y" ]] || [[ $answer == "" ]]; then
@@ -17,16 +17,18 @@ answeryes () {
 }
 
 installpkg () {
-    version=$(grep pkgver $srcdir/$1/.SRCINFO | sed "s/pkgver =//; s/\t//g; s/ //g")
-    cd $srcdir/$1
+    version=$(grep pkgver $srcdir/"$1"/.SRCINFO | sed "s/pkgver =//; s/\t//g; s/ //g")
+    (
+    cd $srcdir/"$1" || exit
     makepkg -si # build package
+    )
     sed -i "/$1/d" $pkgfile # remove old listing from file
     echo "$1 $version" >> $pkgfile # add to list of installed packages
-    printf "$1 installed successfully!\n"
+    printf "%s installed successfully!\n" "$1"
 }
 
 packageexists () {
-    status=$(curl -s --head -w %{http_code} https://aur.archlinux.org/cgit/aur.git/tree/.SRCINFO?h=$1 -o /dev/null)
+    status=$(curl -s --head -w %{http_code} https://aur.archlinux.org/cgit/aur.git/tree/.SRCINFO?h="$1" -o /dev/null)
     if [[ $status == 200 ]]; then
         return 0
     else
@@ -37,22 +39,26 @@ packageexists () {
 installall () {
     for ((i=1; i<=$#; i++)); do
         if packageexists "${!i}"; then
-            if [[ -d $srcdir/${!i} ]]; then
-                printf "There is a previously cloned repo of ${!i}, do you want to update it? (Y/n)"
-                read answer
+            if grep -q ${!i} $pkgfile; then
+                printf "%s is already installed, do you want to update it? (Y/n) " "${!i}"
+                read -r answer
                 if answeryes; then
-                    rm -rf $srcdir/${!i}
+                    if [[ -d "$srcdir"/"${!i}" ]]; then
+                        rm -rf "${srcdir:?}/"${!i}
+                    fi
                     git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
                     printf "Repo updated! Installing package...\n"
+                    installpkg "${!i}"
                 else
-                    printf "Reinstalling current version\n"
+                    printf "Not reinstalling %s.\n" "${!i}"
                 fi
             else
+                printf "Installing %s...\n" "${!i}"
                 git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
+                installpkg "${!i}"
             fi
-            installpkg "${!i}"
         else
-            printf "Package ${!i} does not exist.\n"
+            printf "Package %s does not exist.\n" "${!i}"
         fi
     done
 }
@@ -65,9 +71,9 @@ removeall () {
             if [[ -d $srcdir/${!i} ]]; then
                 clean "${!i}"
             fi
-            printf "Package ${!i} removed!\n"
+            printf "Package %s removed!\n" "${!i}"
         else
-            printf "Package ${!i} does not exist.\n"
+            printf "Package %s does not exist.\n" "${!i}"
         fi
     done
 }
@@ -80,9 +86,9 @@ purgeall () {
             if [[ -d $srcdir/${!i} ]]; then
                 clean "${!i}"
             fi
-            printf "Package ${!i} removed!\n"
+            printf "Package %s removed!\n" "${!i}"
         else
-            printf "Package ${!i} does not exist.\n"
+            printf "Package %s does not exist.\n" "${!i}"
         fi
     done
 }
@@ -92,18 +98,18 @@ updateall () {
         usage
     else
         printf "Updating packages...\n"
-        for ((i=0; i<$pkgcount; i++)); do
-            pkg=$(echo $aurpkgs | cut -d " " -f $(($i+1)))
-            latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h=$pkg | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
-            installedver=$(grep $pkg $pkgfile | sed "s/$pkg //")
+        for ((i=0; i<pkgcount; i++)); do
+            pkg=$(echo "$aurpkgs" | cut -d " " -f $((i+1)))
+            latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$pkg" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
+            installedver=$(grep "$pkg" $pkgfile | sed "s/$pkg //")
             if [[ "$installedver" == "$latestver" ]]; then
-                printf "$pkg is up to date!\n"
+                printf "%s is up to date!\n" "$pkg"
             else
-                printf "Updating $pkg from $installedver to $latestver.\n"
-                rm -rf $srcdir/$pkg
-                git clone -q https://aur.archlinux.org/$pkg.git $srcdir/$pkg
+                printf "Updating %s from %s to %s.\n" "$pkg" "$installedver" "$latestver"
+                rm -rf "${srcdir:?}/" "$pkg"
+                git clone -q https://aur.archlinux.org/"$pkg".git "$srcdir"/"$pkg"
                 installpkg "$pkg"
-                printf "Updated from $installedver to $latestver\n"
+                printf "Updated from %s to %s\n" "$installedver" "$latestver"
             fi
         done
         printf "Update complete.\n"
@@ -115,7 +121,7 @@ versionall () {
         if grep -q ${!i} $pkgfile; then
             grep ${!i} $pkgfile
         else
-            printf "Package ${!i} does not exist.\n"
+            printf "Package %s does not exist.\n" "${!i}"
         fi
     done
 }
@@ -128,29 +134,38 @@ search () {
             version=$(grep pkgver $srcdir/pkginfo-${!i} | sed "s/\tpkgver = //")
             rm $srcdir/pkginfo-${!i}
             if grep -q ${!i} $pkgfile; then
-                printf "${!i} $version [INSTALLED]\n    $desc\n"
+                printf "%s %s [INSTALLED]\n    $desc\n" "${!i}" "$version"
             else
-                printf "${!i} $version [NOT INSTALLED]\n    $desc\n"
+                printf "%s %s [NOT INSTALLED]\n    $desc\n" "${!i}" "$version"
             fi
         else
-            printf "No matches found for ${!i}\n"
+            printf "No matches found for %s\n" "${!i}"
         fi
     done
 }
 
 clean () {
     if [[ $# == 0 ]]; then
-        remove=*
+        (
+            cd $srcdir || exit
+            rm -rf -- *
+        )
+        printf "Source repo(s) deleted.\n"
     else
-        remove=$@
-    fi
-    printf "Remove cloned source repo(s) (Y/n)"
-    read answer
-    if answeryes; then
-        rm -rf $srcdir/$remove
-        printf "Repo(s) removed.\n"
-    else
-        printf "Operation cancelled.\n"  
+        for ((i=1; i<=$#; i++)); do
+            if [[ -d "$srcdir"/"${!i}" ]]; then
+                (
+                    cd $srcdir || exit
+                    rm -rf ${!i}
+                )
+            else
+                printf "Repo %s does not exist.\n" "${!i}"
+                if [[ $# == 1 ]]; then
+                    return 0
+                fi
+            fi
+        done
+        printf "Source repo(s) deleted.\n"
     fi
 }
 
