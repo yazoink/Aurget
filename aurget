@@ -3,13 +3,18 @@
 ## Aurget by yazoink
 ## A very minimal AUR helper.
 
-unset answer i version installedver latestver pkg desc version remove
+unset answer i j version installedver latestver pkg desc version remove pkgcount
 
 srcdir=~/.cache/aurget # directory for cloned repos
 cfgdir=~/.local/share/aurget
-pkgfile=$cfgdir/aurgetpkgs # list of installed packages
-aurpkgs=$(cat $pkgfile | sed "s/\s.*//")
-pkgcount=$(echo "$aurpkgs" | wc -w)
+pkgfile="$cfgdir"/aurgetpkgs # list of installed packages)
+
+i=0
+while read -r line; do
+    pkgs[i]=$(echo "$line" | sed 's/\s.*//')
+    ((i++))
+done < "$pkgfile"
+pkgcount=$(echo ${pkgs[@]} | wc -w)
 
 answeryes () {
     if [[ ${answer^^} == "YES" ]] || [[ ${answer^^} == "Y" ]] || [[ $answer == "" ]]; then
@@ -96,26 +101,34 @@ purgeall () {
     done
 }
 
+updatepkg () {
+    latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$1" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
+    installedver=$(grep "$1" "$pkgfile" | sed "s/$1 //")
+    if [[ "$installedver" == "$latestver" ]]; then
+        printf "%s is up to date! \n" "$1"
+    else
+        printf "Upgrading %s from %s to %s..." "$1" "$installedver" "$latestver \n"
+        if [[ -d "$srcdir"/"$1" ]]; then
+            (
+            cd "$srcdir" || exit
+            rm -rf "$1"
+            )
+        fi
+        git clone -q https://aur.archlinux.org/"$1".git "$srcdir"/"$1"
+        installpkg "$1"
+        printf "Upgraded %s from %s to %s" upgraded "$1" "$installedver" "$latestver \n"
+    fi
+}
+
 updateall () {
-    if [[ $# != 0 ]]; then
+    if [[ ! $# == 0 ]]; then
         usage
     else
         printf "Updating packages...\n"
-        for ((i=0; i<pkgcount; i++)); do
-            pkg=$(echo "$aurpkgs" | cut -d " " -f $((i+1)))
-            latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$pkg" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
-            installedver=$(grep "$pkg" $pkgfile | sed "s/$pkg //")
-            if [[ "$installedver" == "$latestver" ]]; then
-                printf "%s is up to date!\n" "$pkg"
-            else
-                printf "Updating %s from %s to %s.\n" "$pkg" "$installedver" "$latestver"
-                rm -rf "${srcdir:?}/" "$pkg"
-                git clone -q https://aur.archlinux.org/"$pkg".git "$srcdir"/"$pkg"
-                installpkg "$pkg"
-                printf "Updated from %s to %s\n" "$installedver" "$latestver"
-            fi
+        for ((i=1; i<pkgcount; i++)); do
+            updatepkg "${pkgs[i]}"
         done
-        printf "Update complete.\n"
+        printf "Upgrade complete!\n"
     fi
 }
 
