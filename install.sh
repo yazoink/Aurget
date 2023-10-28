@@ -4,7 +4,7 @@ if [[ ! grep -q ~/.local/bin $PATH ]]
     if [[ ! -d ~/.local/bin ]]; then
         mkdir -p ~/.local/bin
     fi
-    echo 'export PATH="~/.local/bin:$PATH"' >> ~/.bashrc
+    echo 'export PATH="~/.local/bin:$PATH"' >> ~/.*shrc
 fi
 
 chmod +x aurget
