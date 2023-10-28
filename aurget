@@ -38,14 +38,14 @@ installall () {
     for ((i=1; i<=$#; i++)); do
         if packageexists "${!i}"; then
             if [[ -d $srcdir/${!i} ]]; then
-                printf "There is a previously cloned repo of this package, do you want to update it? (Y/n)"
+                printf "There is a previously cloned repo of ${!i}, do you want to update it? (Y/n)"
                 read answer
                 if answeryes; then
                     rm -rf $srcdir/${!i}
                     git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
                     printf "Repo updated! Installing package...\n"
                 else
-                    printf "Reinstalling currently installed version\n"
+                    printf "Reinstalling current version\n"
                 fi
             else
                 git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
@@ -99,6 +99,7 @@ updateall () {
             if [[ "$installedver" == "$latestver" ]]; then
                 printf "$pkg is up to date!\n"
             else
+                printf "Updating $pkg from $installedver to $latestver.\n"
                 rm -rf $srcdir/$pkg
                 git clone -q https://aur.archlinux.org/$pkg.git $srcdir/$pkg
                 installpkg "$pkg"
