@@ -9,7 +9,8 @@
 `$ git clone https://github.com/yazoink/Aurget`   
 `$ cd Aurget`    
 `$ ./install.sh`    
-
+### Updating
+`$ curl https://raw.githubusercontent.com/yazoink/Aurget/master/aurget -o ~/.local/bin/aurget`    
 ### Usage
 #### aurget (option) [PACKAGE(S)]
 Options:  
