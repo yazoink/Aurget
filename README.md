@@ -6,22 +6,22 @@
 - base-devel
 - curl
 
-`$ git clone https://github.com/yazoink/Aurget`   
-`$ cd Aurget`    
-`$ ./install.sh`    
-### Updating
-`$ curl https://raw.githubusercontent.com/yazoink/Aurget/master/aurget -o ~/.local/bin/aurget`    
+`$ git clone https://github.com/yazoink/Aurget`
+`$ cd Aurget`
+`$ ./install.sh`
+
 ### Usage
 #### aurget (option) [PACKAGE(S)]
 Options:  
-&emsp; --install, -i&emsp;&emsp;&ensp;&ensp;Install/individually upgrade packages  
-&emsp; --remove, -r&emsp;&emsp;Remove packages  
-&emsp; --purge, -p&emsp;&emsp;&ensp;Purge packages  
-&emsp; --update, -u&emsp;&emsp;Upgrade all packages  
-&emsp; --version, -v&emsp;&emsp;See version of package  
-&emsp; --list -l, &emsp;&emsp;&emsp;&emsp;List all installed AUR packages  
-&emsp; --search, -s&emsp;&emsp;&nbsp;Search for packages  
-&emsp; --clean,-c&emsp;&emsp;&emsp;&nbsp;Remove cloned repos    
-&emsp; --help, -h &emsp;&emsp;&emsp;Help  
+&emsp; --install, -i&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;&ensp;Install/individually upgrade packages  
+&emsp; --remove, -r&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Remove packages  
+&emsp; --purge, -p&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;Purge packages  
+&emsp; --update, -u&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Upgrade all packages  
+&emsp; --update-aurget, -ua&emsp;&emsp;Upgrade Aurget  
+&emsp; --version, -v&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;See version of package  
+&emsp; --list -l, &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;List all installed AUR packages  
+&emsp; --search, -s&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Search for packages  
+&emsp; --clean,-c&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Remove cloned repos    
+&emsp; --help, -h &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Help  
 
 Any preinstalled AUR packages must be reinstalled with Aurget to be included in world.
