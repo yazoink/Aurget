@@ -6,9 +6,9 @@
 - base-devel
 - curl
 
-`$ git clone https://github.com/yazoink/Aurget`
-`$ cd Aurget`
-`$ ./install.sh`
+`$ git clone https://github.com/yazoink/Aurget`   
+`$ cd Aurget`   
+`$ ./install.sh`   
 
 ### Usage
 #### aurget (option) [PACKAGE(S)]
@@ -20,6 +20,7 @@ Options:
 &emsp; --update-aurget, -ua&emsp;&emsp;Upgrade Aurget  
 &emsp; --version, -v&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;See version of package  
 &emsp; --list -l, &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;List all installed AUR packages  
+&emsp; --list-repos, -lr&emsp;&emsp;&emsp;&emsp;&emsp;List all currently cloned repos  
 &emsp; --search, -s&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Search for packages  
 &emsp; --clean,-c&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Remove cloned repos    
 &emsp; --help, -h &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Help  
