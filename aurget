@@ -143,6 +143,7 @@ clean () {
     read answer
     if answeryes; then
         rm -rf $srcdir/$remove
+        echo "Repo(s) removed."
     else
       echo "Operation cancelled."  
     fi
