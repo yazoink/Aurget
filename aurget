@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# sanitize
-unset answer i version installedver latestver pkg desc version
+unset answer i version installedver latestver pkg desc version remove
 
 srcdir=~/.cache/aurget # directory for cloned repos
 cfgdir=~/.local/share/aurget
