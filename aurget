@@ -133,6 +133,21 @@ search () {
     done
 }
 
+clean () {
+    if [[ $# == 0 ]]; then
+        remove=*
+    else
+        remove=$@
+    fi
+    echo "Are you sure you want to remove cloned repo(s) (Y/n)"
+    read answer
+    if answeryes; then
+        rm -rf $srcdir/$remove
+    else
+      echo "Operation cancelled."  
+    fi
+}
+
 usage () {
     echo "Usage: aurget <option> [PACKAGE(S)]
     Options:
@@ -143,6 +158,7 @@ usage () {
     --version, -v                   See version of package
     --list -l,                      List all installed AUR packages
     --search, -s                    Search for package
+    --clean -c                      Remove cloned repos
     --help, -h                      Help"
 }
 
@@ -162,5 +178,6 @@ case $1 in
     --version | -v) versionall "${@:2}" && exit 0 ;;
     --list | -l) cat $pkgfile && exit 0 ;;
     --search | -s) search "${@:2}" && exit 0 ;;
+    --clean | -c) clean "${@:2}" && exit 0 ;;
     *) usage && exit 0 ;;
 esac
