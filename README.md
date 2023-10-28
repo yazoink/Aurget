@@ -8,7 +8,6 @@
 
 `$ git clone https://github.com/yazoink/Aurget`   
 `$ cd Aurget`    
-`$ chmod +x install.sh`    
 `$ ./install.sh`    
 ### Updating
 `$ curl https://raw.githubusercontent.com/yazoink/Aurget/master/aurget -o ~/.local/bin/aurget`    

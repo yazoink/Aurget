@@ -6,7 +6,6 @@ if [[ ! -d ~/.local/bin ]]; then
     source ~/.*shrc
 fi
 
-chmod +x aurget
 cp aurget ~/.local/bin
 mkdir -p ~/.local/share/aurget
 touch ~/.local/share/aurget/aurgetpkgs
