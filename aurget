@@ -16,17 +16,8 @@ answeryes () {
     fi
 }
 
-rmsrc () {
-    echo "Delete cloned repo $1? (Y/n)"
-    read answer
-    if answeryes; then
-        rm -rf $srcdir/$1
-        echo "Cloned repo deleted."
-    fi
-}
-
 installpkg () {
-    version=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h=$1 | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
+    version=$(grep pkgver $srcdir/$1/.SRCINFO | sed "s/pkgver =//; s/\t//g; s/ //g")
     cd $srcdir/$1
     makepkg -si # build package
     sed -i "/$1/d" $pkgfile # remove old listing from file
@@ -46,8 +37,19 @@ packageexists () {
 installall () {
     for ((i=1; i<=$#; i++)); do
         if packageexists "${!i}"; then
-            rm -rf $srcdir/${!i}
-            git clone https://aur.archlinux.org/${!i}.git $srcdir/${!i}
+            if [[ -d $srcdir/${!i} ]]; then
+                echo "There is a previously cloned repo of this package, do you want to update it? (Y/n)"
+                read answer
+                if answeryes; then
+                    rm -rf $srcdir/${!i}
+                    git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
+                    echo "Repo updated! Installing package..."
+                else
+                    echo "Reinstalling currently installed version"
+                fi
+            else
+                git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
+            fi
             installpkg "${!i}"
         else
             echo "Package ${!i} does not exist."
@@ -60,7 +62,9 @@ removeall () {
         if grep -q ${!i} $pkgfile; then # determine if package is in list
             sudo pacman -R ${!i}
             sed -i "/${!i}/d" $pkgfile # remove from package list
-            rmsrc ${!i}
+            if [[ -d $srcdir/${!i} ]]; then
+                clean "${!i}"
+            fi
             echo "Package ${!i} removed!"
         else
             echo "Package ${!i} does not exist."
@@ -73,7 +77,9 @@ purgeall () {
         if grep -q ${!i} $pkgfile; then
             sudo pacman -Rns ${!i}
             sed -i "/${!i}/d" $pkgfile
-            rmsrc ${!i}
+            if [[ -d $srcdir/${!i} ]]; then
+                clean "${!i}"
+            fi
             echo "Package ${!i} removed!"
         else
             echo "Package ${!i} does not exist."
@@ -94,10 +100,9 @@ updateall () {
                 echo "$pkg is up to date!"
             else
                 rm -rf $srcdir/$pkg
-                git clone https://aur.archlinux.org/$pkg.git $srcdir/$pkg
-                cd $srcdir/$pkg
-                makepkg -si
-                echo "$pkg updated from $installedver to $latestver"
+                git clone -q https://aur.archlinux.org/$pkg.git $srcdir/$pkg
+                installpkg "$pkg"
+                echo "Updated from $installedver to $latestver"
             fi
         done
         echo "Update complete."
@@ -138,7 +143,7 @@ clean () {
     else
         remove=$@
     fi
-    echo "Are you sure you want to remove cloned repo(s) (Y/n)"
+    echo "Remove cloned source repo(s) (Y/n)"
     read answer
     if answeryes; then
         rm -rf $srcdir/$remove
