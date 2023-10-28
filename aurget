@@ -55,7 +55,7 @@ installall () {
                         rm -rf "${srcdir:?}/"${!i}
                     fi
                     git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
-                    printf "Repo updated! Installing package...\n"
+                    printf "Repo updated, Installing package...\n"
                     installpkg "${!i}"
                 else
                     printf "Not reinstalling %s.\n" "${!i}"
@@ -105,9 +105,9 @@ updatepkg () {
     latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$1" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
     installedver=$(grep "$1" "$pkgfile" | sed "s/$1 //")
     if [[ "$installedver" == "$latestver" ]]; then
-        printf "%s is up to date! \n" "$1"
+        printf "%s is up to date!\n" "$1"
     else
-        printf "Upgrading %s from %s to %s..." "$1" "$installedver" "$latestver \n"
+        printf "Upgrading %s from %s to %s...\n" "$1" "$installedver" "$latestver"
         if [[ -d "$srcdir"/"$1" ]]; then
             (
             cd "$srcdir" || exit
@@ -116,7 +116,7 @@ updatepkg () {
         fi
         git clone -q https://aur.archlinux.org/"$1".git "$srcdir"/"$1"
         installpkg "$1"
-        printf "Upgraded %s from %s to %s\n" upgraded "$1" "$installedver" "$latestver"
+        printf "Upgraded %s from %s to %s\n" "$1" "$installedver" "$latestver"
     fi
 }
 
