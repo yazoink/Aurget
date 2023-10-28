@@ -3,7 +3,7 @@
 ## Aurget by yazoink
 ## A very minimal AUR helper.
 
-unset answer i j version installedver latestver pkg desc version remove pkgcount
+unset answer i j version installedver pkgs latestver pkg desc version remove pkgcount
 
 srcdir=~/.cache/aurget # directory for cloned repos
 cfgdir=~/.local/share/aurget
@@ -204,6 +204,7 @@ usage () {
     --update-aurget, -ua            Upgrade Aurget
     --version, -v                   See version of package
     --list -l,                      List all installed AUR packages
+    --list-repos, -lr               List all currently cloned repos
     --search, -s                    Search for package
     --clean -c                      Remove cloned repos
     --help, -h                      Help"
@@ -225,6 +226,7 @@ case $1 in
     --update-aurget | -ua) upgradeaurget "${@:2}" && exit 0;;
     --version | -v) versionall "${@:2}" && exit 0 ;;
     --list | -l) cat $pkgfile && exit 0 ;;
+    --list-repos | -lr) ls $srcdir | sed "s/\s/\n/" && exit 0 ;;
     --search | -s) search "${@:2}" && exit 0 ;;
     --clean | -c) clean "${@:2}" && exit 0 ;;
     *) usage && exit 0 ;;
