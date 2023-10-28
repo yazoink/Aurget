@@ -149,7 +149,7 @@ search () {
             desc=$(grep pkgdesc $srcdir/pkginfo-${!i} | sed "s/\tpkgdesc = //")
             version=$(grep pkgver $srcdir/pkginfo-${!i} | sed "s/\tpkgver = //")
             rm $srcdir/pkginfo-${!i}
-            if grep -q ${!i} $pkgfile; then
+            if grep -w -q ${!i} $pkgfile; then
                 printf "%s %s [INSTALLED]\n    $desc\n" "${!i}" "$version"
             else
                 printf "%s %s [NOT INSTALLED]\n    $desc\n" "${!i}" "$version"
