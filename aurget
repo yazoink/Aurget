@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+## Aurget by yazoink
+## A very minimal AUR helper.
 
 unset answer i version installedver latestver pkg desc version remove
 
