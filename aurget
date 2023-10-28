@@ -22,7 +22,7 @@ installpkg () {
     makepkg -si # build package
     sed -i "/$1/d" $pkgfile # remove old listing from file
     echo "$1 $version" >> $pkgfile # add to list of installed packages
-    echo "$1 installed successfully!"
+    printf "$1 installed successfully!\n"
 }
 
 packageexists () {
@@ -38,21 +38,21 @@ installall () {
     for ((i=1; i<=$#; i++)); do
         if packageexists "${!i}"; then
             if [[ -d $srcdir/${!i} ]]; then
-                echo "There is a previously cloned repo of this package, do you want to update it? (Y/n)"
+                printf "There is a previously cloned repo of this package, do you want to update it? (Y/n)"
                 read answer
                 if answeryes; then
                     rm -rf $srcdir/${!i}
                     git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
-                    echo "Repo updated! Installing package..."
+                    printf "Repo updated! Installing package...\n"
                 else
-                    echo "Reinstalling currently installed version"
+                    printf "Reinstalling currently installed version\n"
                 fi
             else
                 git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
             fi
             installpkg "${!i}"
         else
-            echo "Package ${!i} does not exist."
+            printf "Package ${!i} does not exist.\n"
         fi
     done
 }
@@ -65,9 +65,9 @@ removeall () {
             if [[ -d $srcdir/${!i} ]]; then
                 clean "${!i}"
             fi
-            echo "Package ${!i} removed!"
+            printf "Package ${!i} removed!\n"
         else
-            echo "Package ${!i} does not exist."
+            printf "Package ${!i} does not exist.\n"
         fi
     done
 }
@@ -80,32 +80,32 @@ purgeall () {
             if [[ -d $srcdir/${!i} ]]; then
                 clean "${!i}"
             fi
-            echo "Package ${!i} removed!"
+            printf "Package ${!i} removed!\n"
         else
-            echo "Package ${!i} does not exist."
+            printf "Package ${!i} does not exist.\n"
         fi
     done
 }
 
 updateall () {
-    if [[ $# > 1 ]]; then
+    if [[ $# != 0 ]]; then
         usage
     else
-        echo "Updating packages..."
+        printf "Updating packages...\n"
         for ((i=0; i<$pkgcount; i++)); do
             pkg=$(echo $aurpkgs | cut -d " " -f $(($i+1)))
             latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h=$pkg | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
             installedver=$(grep $pkg $pkgfile | sed "s/$pkg //")
             if [[ "$installedver" == "$latestver" ]]; then
-                echo "$pkg is up to date!"
+                printf "$pkg is up to date!\n"
             else
                 rm -rf $srcdir/$pkg
                 git clone -q https://aur.archlinux.org/$pkg.git $srcdir/$pkg
                 installpkg "$pkg"
-                echo "Updated from $installedver to $latestver"
+                printf "Updated from $installedver to $latestver\n"
             fi
         done
-        echo "Update complete."
+        printf "Update complete.\n"
     fi
 }
 
@@ -114,7 +114,7 @@ versionall () {
         if grep -q ${!i} $pkgfile; then
             grep ${!i} $pkgfile
         else
-            echo "Package ${!i} does not exist."
+            printf "Package ${!i} does not exist.\n"
         fi
     done
 }
@@ -132,7 +132,7 @@ search () {
                 printf "${!i} $version [NOT INSTALLED]\n    $desc\n"
             fi
         else
-            echo "No matches found for ${!i}"
+            printf "No matches found for ${!i}\n"
         fi
     done
 }
@@ -143,13 +143,13 @@ clean () {
     else
         remove=$@
     fi
-    echo "Remove cloned source repo(s) (Y/n)"
+    printf "Remove cloned source repo(s) (Y/n)"
     read answer
     if answeryes; then
         rm -rf $srcdir/$remove
-        echo "Repo(s) removed."
+        printf "Repo(s) removed.\n"
     else
-      echo "Operation cancelled."  
+        printf "Operation cancelled.\n"  
     fi
 }
 
