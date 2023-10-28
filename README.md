@@ -2,16 +2,16 @@
 ## A very minimal AUR helper.
 ### Installation
 #### dependencies
-- git  
-- base-devel  
-- curl  
+- git
+- base-devel
+- curl
 
-`$ git clone https://github.com/yazoink/Aurget`  
-`$ cd Aurget`  
-`$ ./install.sh`  
+`$ git clone https://github.com/yazoink/Aurget`
+`$ cd Aurget`
+`$ ./install.sh`
 
 ### Usage
-#### aurget (option) [PACKAGE(S)]  
+#### aurget (option) [PACKAGE(S)]
 Options:  
 &emsp; --install, -i&emsp;&emsp;&ensp;&ensp;Install/individually upgrade packages  
 &emsp; --remove, -r&emsp;&emsp;Remove packages  
@@ -20,6 +20,7 @@ Options:
 &emsp; --version, -v&emsp;&emsp;See version of package  
 &emsp; --list -l, &emsp;&emsp;&emsp;&emsp;List all installed AUR packages  
 &emsp; --search, -s&emsp;&emsp;&nbsp;Search for packages  
+&emsp; --clean,-c&emsp;&emsp;&emsp;&nbsp;Remove cloned repos    
 &emsp; --help, -h &emsp;&emsp;&emsp;Help  
 
 Any preinstalled AUR packages must be reinstalled with Aurget to be included in world.
