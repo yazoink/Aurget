@@ -1,9 +1,7 @@
 #!/bin/bash
 
-if [[ ! grep -q ~/.local/bin $PATH ]]
-    if [[ ! -d ~/.local/bin ]]; then
-        mkdir -p ~/.local/bin
-    fi
+if [[ ! -d ~/.local/bin ]]; then
+    mkdir -p ~/.local/bin
     echo 'export PATH="~/.local/bin:$PATH"' >> ~/.*shrc
 fi
 
