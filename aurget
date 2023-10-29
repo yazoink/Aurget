@@ -123,8 +123,8 @@ updateall () {
             pkgs[i]=$(echo "$line" | sed 's/\s.*//')
             ((i++))
         done < "$pkgfile"
-        pkgcount=$(echo "${pkgs[@]}" | wc -w)
-        for ((i=1; i<pkgcount; i++)); do
+        pkgcount=$i
+        for ((i=0; i<pkgcount; i++)); do
             updatepkg "${pkgs[i]}"
         done
         printf "Upgrade complete!\n"
