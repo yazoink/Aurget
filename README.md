@@ -1,5 +1,5 @@
 # Aurget
-## A very minimal AUR helper.
+## A minimal AUR helper.
 ### Installation
 #### dependencies
 - git
