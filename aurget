@@ -1,14 +1,13 @@
 #!/bin/bash
 #
 ## Aurget by yazoink
-## A very minimal AUR helper.
+## A minimal AUR helper.
 
 unset answer i j version installedver pkgs latestver pkg desc version remove pkgcount
 
 srcdir=~/.cache/aurget # directory for cloned repos
 cfgdir=~/.local/share/aurget
 pkgfile="$cfgdir"/aurgetpkgs # list of installed packages)
-
 
 answeryes () {
     if [[ ${answer^^} == "YES" ]] || [[ ${answer^^} == "Y" ]] || [[ $answer == "" ]]; then
