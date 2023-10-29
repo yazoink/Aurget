@@ -22,7 +22,7 @@ Options:
 &emsp; --list -l, &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;List all installed AUR packages  
 &emsp; --list-repos, -lr&emsp;&emsp;&emsp;&emsp;&emsp;List all currently cloned repos  
 &emsp; --search, -s&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Search for packages  
-&emsp; --clean,-c&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Remove cloned repos    
+&emsp; --clean,-c&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Remove cloned repo(s)    
 &emsp; --help, -h &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Help  
 
 Any preinstalled AUR packages must be reinstalled with Aurget to be included in world.
