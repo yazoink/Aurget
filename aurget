@@ -10,7 +10,7 @@ cfgdir=~/.local/share/aurget
 pkgfile="$cfgdir"/aurgetpkgs # list of installed packages)
 
 answeryes () {
-    if [[ ${answer^^} == "YES" ]] || [[ ${answer^^} == "Y" ]] || [[ $answer == "" ]]; then
+    if [[ ${answer^^} = "YES" ]] || [[ ${answer^^} = "Y" ]] || [[ $answer = "" ]]; then
         return 0
     else
         return 1
@@ -30,7 +30,7 @@ installpkg () {
 
 packageexists () {
     status=$(curl -s --head -w %{http_code} https://aur.archlinux.org/cgit/aur.git/tree/.SRCINFO?h="$1" -o /dev/null)
-    if [[ $status == 200 ]]; then
+    if [[ $status -eq 200 ]]; then
         return 0
     else
         return 1
@@ -97,7 +97,7 @@ purgeall () {
 updatepkg () {
     latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$1" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
     installedver=$(grep "$1" "$pkgfile" | sed "s/$1 //")
-    if [[ "$installedver" == "$latestver" ]]; then
+    if [[ "$installedver" = "$latestver" ]]; then
         printf "%s is up to date!\n" "$1"
     else
         printf "Upgrading %s from %s to %s...\n" "$1" "$installedver" "$latestver"
@@ -114,7 +114,7 @@ updatepkg () {
 }
 
 updateall () {
-    if [[ ! $# == 0 ]]; then
+    if [[ ! $# -eq 0 ]]; then
         usage
     else
         printf "Updating packages...\n"
@@ -160,32 +160,40 @@ search () {
 }
 
 clean () {
-    if [[ $# == 0 ]]; then
-        (
+    if [[ $# -le 0 ]] && [[ -n "$(ls $srcdir)" ]]; then
+        printf "Delete repo(s) %s? " "$(ls "$srcdir")"
+        read -r answer
+        if answeryes; then
+            (
             cd $srcdir || exit
             rm -rf -- *
-        )
-        printf "Source repo(s) deleted.\n"
-    else
+            )
+            printf "Source repo(s) deleted.\n"
+        else
+            printf "Operation aborted.\n"
+        fi
+    elif [[ $# -gt 0 ]] && [[ -n "$(ls $srcdir)" ]]; then
         for ((i=1; i<=$#; i++)); do
             if [[ -d "$srcdir"/"${!i}" ]]; then
                 (
-                    cd $srcdir || exit
-                    rm -rf ${!i}
+                 cd $srcdir || exit
+                 rm -rf ${!i}
                 )
             else
                 printf "Repo %s does not exist.\n" "${!i}"
-                if [[ $# == 1 ]]; then
+                if [[ $# -eq 1 ]]; then
                     return 0
                 fi
             fi
         done
         printf "Source repo(s) deleted.\n"
+    else
+        printf "Source directory is empty.\n"
     fi
 }
 
 upgradeaurget () {
-    if [[ $# == 0 ]]; then
+    if [[ $# -eq 0 ]]; then
         curl -s https://raw.githubusercontent.com/yazoink/Aurget/master/aurget -o ~/.local/bin/aurget
         printf "Aurget upgraded!\n"
     else
