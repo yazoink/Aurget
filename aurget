@@ -17,15 +17,21 @@ answeryes () {
     fi
 }
 
+
 installpkg () {
     version=$(grep pkgver $srcdir/"$1"/.SRCINFO | sed "s/pkgver =//; s/\t//g; s/ //g")
     (
     cd $srcdir/"$1" || exit
-    makepkg -si # build package
+    makepkg -si || exit # build package
     )
-    sed -i "/$1/d" $pkgfile # remove old listing from file
-    echo "$1 $version" >> $pkgfile # add to list of installed packages
-    printf "%s installed successfully!\n" "$1"
+    if [[ "$?" == 0 ]]; then
+        sed -i "/$1/d" $pkgfile # remove old listing from file
+        echo "$1 $version" >> $pkgfile # add to list of installed packages
+        printf "%s installed successfully!\n" "$1"
+    else
+        printf "Package %s failed to build.\n" "$1"
+        exit 1
+    fi
 }
 
 packageexists () {
@@ -161,7 +167,7 @@ search () {
 
 clean () {
     if [[ $# -le 0 ]] && [[ -n "$(ls $srcdir)" ]]; then
-        printf "Delete repo(s) %s? " "$(ls "$srcdir")"
+        printf "Delete repo(s) %s? " "$(echo $(ls $srcdir) | sed "s/\n/\s/g")"
         read -r answer
         if answeryes; then
             (
@@ -233,7 +239,7 @@ case $1 in
     --update-aurget | -ua) upgradeaurget "${@:2}" && exit 0;;
     --version | -v) versionall "${@:2}" && exit 0 ;;
     --list | -l) cat $pkgfile && exit 0 ;;
-    --list-repos | -lr) ls $srcdir | sed "s/\s/\n/" && exit 0 ;;
+    --list-repos | -lr) ls $srcdir "s/\s/\n/" && exit 0 ;;
     --search | -s) search "${@:2}" && exit 0 ;;
     --clean | -c) clean "${@:2}" && exit 0 ;;
     *) usage && exit 0 ;;
