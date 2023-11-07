@@ -1,14 +1,21 @@
 #!/bin/bash
 
-if [[ ! -d ~/.local/bin ]]; then
-    mkdir -p ~/.local/bin
-    echo 'export PATH="~/.local/bin:$PATH"' >> ~/.*shrc
-    source ~/.*shrc
+if [[ ! -d "$HOME"/.local/bin ]]; then
+    mkdir -p "$HOME"/.local/bin
+    if [[ -f "$HOME"/.bashrc ]]; then
+        echo "export PATH="$HOME/.local/bin:$PATH"" >> "$HOME"/.bashrc
+        source "$HOME"/.bashrc
+    elif [[ -f "$HOME"/.zshrc ]]; then
+        echo "export PATH="$HOME/.local/bin:$PATH"" >> "$HOME"/.zshrc
+        source "$HOME"/.zshrc
+    else
+        printf "Please add ~/.local/bin to path.\n"
+    fi
 fi
 
-cp aurget ~/.local/bin
-mkdir -p ~/.local/share/aurget
-touch ~/.local/share/aurget/aurgetpkgs
-mkdir -p ~/.cache/aurget
+cp aurget "$HOME"/.local/bin
+mkdir -p "$HOME"/.local/share/aurget
+touch "$HOME"/.local/share/aurget/aurgetpkgs
+mkdir -p "$HOME"/.cache/aurget
 
-echo "Aurget has been installed!"
+printf "Aurget has been installed!\n"
