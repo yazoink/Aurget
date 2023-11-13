@@ -239,7 +239,7 @@ case $1 in
     --update-aurget | -ua) upgradeaurget "${@:2}" && exit 0;;
     --version | -v) versionall "${@:2}" && exit 0 ;;
     --list | -l) cat $pkgfile && exit 0 ;;
-    --list-repos | -lr) ls $srcdir "s/\s/\n/" && exit 0 ;;
+    --list-repos | -lr) ls $srcdir | sed "s/\s/\n/" && exit 0 ;;
     --search | -s) search "${@:2}" && exit 0 ;;
     --clean | -c) clean "${@:2}" && exit 0 ;;
     *) usage && exit 0 ;;
