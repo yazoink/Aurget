@@ -102,7 +102,7 @@ purgeall () {
 
 updatepkg () {
     latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$1" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
-    installedver=$(grep "$1" "$pkgfile" | sed "s/$1 //")
+    installedver=$(grep "$1 " "$pkgfile" | sed "s/$1 //")
     if [[ "$installedver" = "$latestver" ]]; then
         printf "%s is up to date!\n" "$1"
     else
@@ -138,6 +138,10 @@ updateall () {
 }
 
 versionall () {
+    if [[ $# -eq 0 ]]; then
+        printf "Please specify at least one package.\n"
+        exit 1
+    fi
     for ((i=1; i<=$#; i++)); do
         if grep -q ${!i} $pkgfile; then
             grep ${!i} $pkgfile
