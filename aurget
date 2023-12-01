@@ -3,14 +3,12 @@
 ## Aurget by yazoink
 ## A minimal AUR helper.
 
-unset answer i j version installedver pkgs latestver pkg desc version remove pkgcount
+src_dir=~/.cache/aurget # directory for cloned repos
+cfg_dir=~/.local/share/aurget
+pkg_file="$cfg_dir"/aurgetpkgs # list of installed packages)
 
-srcdir=~/.cache/aurget # directory for cloned repos
-cfgdir=~/.local/share/aurget
-pkgfile="$cfgdir"/aurgetpkgs # list of installed packages)
-
-answeryes () {
-    if [[ ${answer^^} = "YES" ]] || [[ ${answer^^} = "Y" ]] || [[ $answer = "" ]]; then
+answer_yes () {
+    if [[ ${1^^} = "YES" ]] || [[ ${1^^} = "Y" ]] || [[ $1 = "" ]]; then
         return 0
     else
         return 1
@@ -18,15 +16,15 @@ answeryes () {
 }
 
 
-installpkg () {
-    version=$(grep pkgver $srcdir/"$1"/.SRCINFO | sed "s/pkgver =//; s/\t//g; s/ //g")
+install_pkg () {
+    version=$(grep pkgver $src_dir/"$1"/.SRCINFO | sed "s/pkgver =//; s/\t//g; s/ //g")
     (
-    cd $srcdir/"$1" || exit
+    cd $src_dir/"$1" || exit
     makepkg -si || exit # build package
     )
     if [[ "$?" == 0 ]]; then
-        sed -i "/$1/d" $pkgfile # remove old listing from file
-        echo "$1 $version" >> $pkgfile # add to list of installed packages
+        sed -i "/$1/d" $pkg_file # remove old listing from file
+        echo "$1 $version" >> $pkg_file # add to list of installed packages
         printf "%s installed successfully!\n" "$1"
     else
         printf "Package %s failed to build.\n" "$1"
@@ -34,7 +32,7 @@ installpkg () {
     fi
 }
 
-packageexists () {
+pkg_exists () {
     status=$(curl -s --head -w %{http_code} https://aur.archlinux.org/cgit/aur.git/tree/.SRCINFO?h="$1" -o /dev/null)
     if [[ $status -eq 200 ]]; then
         return 0
@@ -43,26 +41,26 @@ packageexists () {
     fi
 }
 
-installall () {
+install_all () {
     for ((i=1; i<=$#; i++)); do
-        if packageexists "${!i}"; then
-            if grep -q ${!i} $pkgfile; then
+        if pkg_exists "${!i}"; then
+            if grep -q ${!i} $pkg_file; then
                 printf "%s is already installed, do you want to update it? (Y/n) " "${!i}"
                 read -r answer
-                if answeryes; then
-                    if [[ -d "$srcdir"/"${!i}" ]]; then
-                        rm -rf "${srcdir:?}/"${!i}
+                if answer_yes "$answer"; then
+                    if [[ -d "$src_dir"/"${!i}" ]]; then
+                        rm -rf "${src_dir:?}/"${!i}
                     fi
-                    git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
+                    git clone -q https://aur.archlinux.org/${!i}.git $src_dir/${!i}
                     printf "Repo updated, Installing package...\n"
-                    installpkg "${!i}"
+                    install_pkg "${!i}"
                 else
                     printf "Not reinstalling %s.\n" "${!i}"
                 fi
             else
                 printf "Installing %s...\n" "${!i}"
-                git clone -q https://aur.archlinux.org/${!i}.git $srcdir/${!i}
-                installpkg "${!i}"
+                git clone -q https://aur.archlinux.org/${!i}.git $src_dir/${!i}
+                install_pkg "${!i}"
             fi
         else
             printf "Package %s does not exist.\n" "${!i}"
@@ -70,12 +68,12 @@ installall () {
     done
 }
 
-removeall () {
+remove_all () {
     for ((i=1; i<=$#; i++)); do
-        if grep -q ${!i} $pkgfile; then # determine if package is in list
+        if grep -q ${!i} $pkg_file; then # determine if package is in list
             sudo pacman -R ${!i}
-            sed -i "/${!i}/d" $pkgfile # remove from package list
-            if [[ -d $srcdir/${!i} ]]; then
+            sed -i "/${!i}/d" $pkg_file # remove from package list
+            if [[ -d $src_dir/${!i} ]]; then
                 clean "${!i}"
             fi
             printf "Package %s removed!\n" "${!i}"
@@ -85,12 +83,12 @@ removeall () {
     done
 }
 
-purgeall () {
+purge_all () {
     for ((i=1; i<=$#; i++)); do
-        if grep -q ${!i} $pkgfile; then
+        if grep -q ${!i} $pkg_file; then
             sudo pacman -Rns ${!i}
-            sed -i "/${!i}/d" $pkgfile
-            if [[ -d $srcdir/${!i} ]]; then
+            sed -i "/${!i}/d" $pkg_file
+            if [[ -d $src_dir/${!i} ]]; then
                 clean "${!i}"
             fi
             printf "Package %s removed!\n" "${!i}"
@@ -100,26 +98,26 @@ purgeall () {
     done
 }
 
-updatepkg () {
-    latestver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$1" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
-    installedver=$(grep "$1 " "$pkgfile" | sed "s/$1 //")
-    if [[ "$installedver" = "$latestver" ]]; then
+update_pkg () {
+    latest_ver=$(curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h="$1" | grep pkgver | sed "s/pkgver =//; s/\t//g; s/ //g")
+    installed_ver=$(grep "$1 " "$pkg_file" | sed "s/$1 //")
+    if [[ "$installed_ver" = "$latest_ver" ]]; then
         printf "%s is up to date!\n" "$1"
     else
-        printf "Upgrading %s from %s to %s...\n" "$1" "$installedver" "$latestver"
-        if [[ -d "$srcdir"/"$1" ]]; then
+        printf "Upgrading %s from %s to %s...\n" "$1" "$installed_ver" "$latest_ver"
+        if [[ -d "$src_dir"/"$1" ]]; then
             (
-            cd "$srcdir" || exit
+            cd "$src_dir" || exit
             rm -rf "$1"
             )
         fi
-        git clone -q https://aur.archlinux.org/"$1".git "$srcdir"/"$1"
-        installpkg "$1"
-        printf "Upgraded %s from %s to %s\n" "$1" "$installedver" "$latestver"
+        git clone -q https://aur.archlinux.org/"$1".git "$src_dir"/"$1"
+        install_pkg "$1"
+        printf "Upgraded %s from %s to %s\n" "$1" "$installed_ver" "$latest_ver"
     fi
 }
 
-updateall () {
+update_all () {
     if [[ ! $# -eq 0 ]]; then
         usage
     else
@@ -128,23 +126,23 @@ updateall () {
         while read -r line; do
             pkgs[i]=$(echo "$line" | sed 's/\s.*//')
             ((i++))
-        done < "$pkgfile"
-        pkgcount=$i
-        for ((i=0; i<pkgcount; i++)); do
-            updatepkg "${pkgs[i]}"
+        done < "$pkg_file"
+        pkg_count=$i
+        for ((i=0; i<pkg_count; i++)); do
+            update_pkg "${pkgs[i]}"
         done
         printf "Upgrade complete!\n"
     fi
 }
 
-versionall () {
+vers_all () {
     if [[ $# -eq 0 ]]; then
         printf "Please specify at least one package.\n"
         exit 1
     fi
     for ((i=1; i<=$#; i++)); do
-        if grep -q ${!i} $pkgfile; then
-            grep ${!i} $pkgfile
+        if grep -q ${!i} $pkg_file; then
+            grep ${!i} $pkg_file
         else
             printf "Package %s does not exist.\n" "${!i}"
         fi
@@ -153,12 +151,12 @@ versionall () {
 
 search () {
     for ((i=1; i<=$#; i++)); do
-        if packageexists "${!i}"; then
-            curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h=${!i} -o $srcdir/pkginfo-${!i} # save .SRCINFO to a temporary file
-            desc=$(grep pkgdesc $srcdir/pkginfo-${!i} | sed "s/\tpkgdesc = //")
-            version=$(grep pkgver $srcdir/pkginfo-${!i} | sed "s/\tpkgver = //")
-            rm $srcdir/pkginfo-${!i}
-            if grep -w -q ${!i} $pkgfile; then
+        if pkg_exists "${!i}"; then
+            curl -s https://aur.archlinux.org/cgit/aur.git/plain/.SRCINFO?h=${!i} -o $src_dir/pkginfo-${!i} # save .SRCINFO to a temporary file
+            desc=$(grep pkgdesc $src_dir/pkginfo-${!i} | sed "s/\tpkgdesc = //")
+            version=$(grep pkgver $src_dir/pkginfo-${!i} | sed "s/\tpkgver = //")
+            rm $src_dir/pkginfo-${!i}
+            if grep -w -q ${!i} $pkg_file; then
                 printf "%s %s [INSTALLED]\n    $desc\n" "${!i}" "$version"
             else
                 printf "%s %s [NOT INSTALLED]\n    $desc\n" "${!i}" "$version"
@@ -170,23 +168,23 @@ search () {
 }
 
 clean () {
-    if [[ $# -le 0 ]] && [[ -n "$(ls $srcdir)" ]]; then
-        printf "Delete repo(s) %s? " "$(echo $(ls $srcdir) | sed "s/\n/\s/g")"
+    if [[ $# -le 0 ]] && [[ -n "$(ls "$src_dir")" ]]; then
+        printf "Delete repo(s) \n%s\n(Y/n) " "$(ls -1 "$src_dir")"
         read -r answer
-        if answeryes; then
+        if answer_yes "$answer"; then
             (
-            cd $srcdir || exit
+            cd $src_dir || exit
             rm -rf -- *
             )
             printf "Source repo(s) deleted.\n"
         else
             printf "Operation aborted.\n"
         fi
-    elif [[ $# -gt 0 ]] && [[ -n "$(ls $srcdir)" ]]; then
+    elif [[ $# -gt 0 ]] && [[ -n "$(ls $src_dir)" ]]; then
         for ((i=1; i<=$#; i++)); do
-            if [[ -d "$srcdir"/"${!i}" ]]; then
+            if [[ -d "$src_dir"/"${!i}" ]]; then
                 (
-                 cd $srcdir || exit
+                 cd $src_dir || exit
                  rm -rf ${!i}
                 )
             else
@@ -202,7 +200,7 @@ clean () {
     fi
 }
 
-upgradeaurget () {
+upgrade_aurget () {
     if [[ $# -eq 0 ]]; then
         curl -s https://raw.githubusercontent.com/yazoink/Aurget/master/aurget -o ~/.local/bin/aurget
         printf "Aurget upgraded!\n"
@@ -227,23 +225,23 @@ usage () {
     --help, -h                      Help"
 }
 
-if [[ ! -d $srcdir ]]; then # if source directory doesn't exist, create it
-    mkdir -p $srcdir
+if [[ ! -d $src_dir ]]; then # if source directory doesn't exist, create it
+    mkdir -p $src_dir
 fi
-if [[ ! -d $cfgdir ]]; then # if config directory and package file don't exist, create them
-    mkdir -p $cfgdir
-    touch $pkgfile
+if [[ ! -d $cfg_dir ]]; then # if config directory and package file don't exist, create them
+    mkdir -p $cfg_dir
+    touch $pkg_file
 fi
 
 case $1 in
-    --install | -i) installall "${@:2}" && exit 0 ;;
-    --remove | -r) removeall "${@:2}" && exit 0 ;;
-    --purge | -p) purgeall "${@:2}" && exit 0 ;;
-    --update | -u) updateall "${@:2}" && exit 0 ;;
-    --update-aurget | -ua) upgradeaurget "${@:2}" && exit 0;;
-    --version | -v) versionall "${@:2}" && exit 0 ;;
-    --list | -l) cat $pkgfile && exit 0 ;;
-    --list-repos | -lr) ls $srcdir | sed "s/\s/\n/" && exit 0 ;;
+    --install | -i) install_all "${@:2}" && exit 0 ;;
+    --remove | -r) remove_all "${@:2}" && exit 0 ;;
+    --purge | -p) purge_all "${@:2}" && exit 0 ;;
+    --update | -u) update_all "${@:2}" && exit 0 ;;
+    --update-aurget | -ua) upgrade_aurget "${@:2}" && exit 0;;
+    --version | -v) vers_all "${@:2}" && exit 0 ;;
+    --list | -l) cat $pkg_file && exit 0 ;;
+    --list-repos | -lr) ls $src_dir | sed "s/\s/\n/" && exit 0 ;;
     --search | -s) search "${@:2}" && exit 0 ;;
     --clean | -c) clean "${@:2}" && exit 0 ;;
     *) usage && exit 0 ;;
